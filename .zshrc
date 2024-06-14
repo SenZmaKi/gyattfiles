@@ -33,6 +33,23 @@ EOF
     fi
 }
 
+sync_gyatts_command_string='
+#!usr/bin/env bash
+cd ~/
+echo "Dumping dconf"
+dconf dump / > .config/backup.dfconf
+echo "Dumping packages"
+pacman -Qen > .config/packages/pacman
+pacman -Qem > .config/packages/paru
+echo "Gitting"
+mv .off.git .git
+git commit -am "Automated sync"
+git push origin master
+mv .git .off.git
+echo "Gyatt"
+'
+create_command "sync_gyatts" $sync_gyatts_command_string
+
 # Run command on loop
 loop_command_string='
 #!usr/bin/env bash
