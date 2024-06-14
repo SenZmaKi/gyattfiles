@@ -1,0 +1,18 @@
+{
+    "sub_or_dub": "sub",
+    "quality": "1080p",
+    "download_folder_paths": [
+        "/mnt/hdd/Sedation/Anime"
+    ],
+    "max_simultaneous_downloads": 2,
+    "font_family": "",
+    "allow_notifications": true,
+    "start_in_fullscreen": true,
+    "run_on_startup": false,
+    "gogo_norm_or_hls_mode": "norm",
+    "tracked_anime": [],
+    "auto_download_site": "pahe",
+    "check_for_new_eps_after": 24,
+    "gogo_skip_calculate": false,
+    "version": "2.1.9"
+}
