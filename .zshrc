@@ -33,6 +33,25 @@ EOF
     fi
 }
 
+activate_gyatts_command_string='
+#!/usr/bin/env bash
+mv ~/.off.git ~/.git
+'
+create_command "activate-gyatts" $activate_gyatts_command_string
+
+deactivate_gyatts_command_string='
+#!/usr/bin/env bash
+mv ~/.git ~/.off.git
+'
+create_command "deactivate-gyatts" $deactivate_gyatts_command_string
+
+update_grub_command_string='
+#!/usr/bin/env bash
+set -e
+exec grub-mkconfig -o /boot/grub/grub.cfg "$@"
+'
+create_command "update-grub" $update_grub_command_string
+
 sync_gyatts_command_string='
 #!usr/bin/env bash
 cd ~/
@@ -42,13 +61,13 @@ echo "Dumping packages"
 pacman -Qen > .config/packages/pacman
 pacman -Qem > .config/packages/paru
 echo "Gitting"
-mv .off.git .git
+activate-gyatts
 git commit -am "Automated sync"
 git push origin master
-mv .git .off.git
+deactivate-gyatts
 echo "Gyatt"
 '
-create_command "sync_gyatts" $sync_gyatts_command_string
+create_command "sync-gyatts" $sync_gyatts_command_string
 
 # Run command on loop
 loop_command_string='
@@ -321,6 +340,9 @@ fi
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
+
+SUDO_EDITOR=nvim
+export SUDO_EDITOR
 
 export PATH="$PATH:/${HOME}/.local/bin"
 if [ "$TMUX" = "" ]; then tmux; fi
