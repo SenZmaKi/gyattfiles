@@ -345,4 +345,5 @@ SUDO_EDITOR=nvim
 export SUDO_EDITOR
 
 export PATH="$PATH:/${HOME}/.local/bin"
+export MUTTER_DEBUG=all
 if [ "$TMUX" = "" ]; then tmux; fi
