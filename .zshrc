@@ -58,8 +58,8 @@ cd ~/
 echo "Dumping dconf"
 dconf dump / > .config/backup.dfconf
 echo "Dumping packages"
-pacman -Qen > .config/packages/pacman
-pacman -Qem > .config/packages/paru
+# pacman -Qen > .config/packages/pacman
+# pacman -Qem > .config/packages/paru
 echo "Gitting"
 activate-gyatts
 git commit -am "Automated sync"
@@ -203,14 +203,14 @@ create_command "memp" $memp_command_string
 eval "$(oh-my-posh init zsh --config ~/.config/oh-my-posh/easy-term.omp.json)"
 
 # Command aliases
-alias update-mirrors="sudo reflector --verbose --latest 10 --protocol https --sort rate --save /etc/pacman.d/mirrorlist && sudo pacman -Sy"
+# alias update-mirrors="sudo reflector --verbose --latest 10 --protocol https --sort rate --save /etc/pacman.d/mirrorlist && sudo pacman -Sy"
 alias py="python"
 alias py11="python3.11"
 alias py9="python3.9"
 alias py7="python3.7"
 alias nt="nautilus"
-alias pacprune="sudo pacman -Rs $(pacman -Qtdq)"
-alias paruskip="paru --noconfirm --skipreview --removemake --cleanafter -S"
+# alias pacprune="sudo pacman -Rs $(pacman -Qtdq)"
+# alias paruskip="paru --noconfirm --skipreview --removemake --cleanafter -S"
 
 
 # If you come from bash you might have to change your $PATH.

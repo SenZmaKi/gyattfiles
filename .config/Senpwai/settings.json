@@ -7,12 +7,11 @@
     "max_simultaneous_downloads": 2,
     "font_family": "",
     "allow_notifications": true,
-    "start_in_fullscreen": true,
+    "start_maximized": true,
     "run_on_startup": false,
-    "gogo_norm_or_hls_mode": "norm",
+    "gogo_mode": "norm",
     "tracked_anime": [],
-    "auto_download_site": "pahe",
-    "check_for_new_eps_after": 24,
-    "gogo_skip_calculate": false,
-    "version": "2.1.9"
+    "tracking_site": "pahe",
+    "tracking_interval": 24,
+    "version": "2.1.13"
 }
