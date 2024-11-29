@@ -1,35 +1,87 @@
-# fastfetch --logo /home/sen/Pictures/icon.png --logo-width 40 --logo-height 30 --pipe false;
-fastfetch
+
+print_green() {
+    local message="$1"
+    # ANSI escape code for green: \033[32m
+    # Reset color: \033[0m
+    echo -e "\033[32m$message\033[0m"
+}
+
+print_red() {
+    local message="$1"
+    # ANSI escape code for red: \033[31m
+    # Reset color: \033[0m
+    echo -e "\033[31m$message\033[0m"
+}
+
+print_yellow() {
+    local message="$1"
+    # ANSI escape code for yellow: \033[33m
+    # Reset color: \033[0m
+    echo -e "\033[33m$message\033[0m"
+}
 
 
-# Used to make custom scripts available as commands
+# tmux
+tpm_dir="$HOME/.config/tmux/plugins/tpm"
+if [ ! -d $tpm_dir ]; then
+  print_yellow "Installing tpm.. ."
+  git clone "https://github.com/tmux-plugins/tpm.git" $tpm_dir
+
+  if [ $? -eq 0 ]; then
+      print_green "tpm installed successfully."
+  else
+      print_red "Error: Failed to install tpm."
+  fi
+
+fi
+
+if [ "$TMUX" = "" ]; then 
+  tmux -u 
+
+  exit
+fi
+
+
+is_termux=$(command -v pkg &> /dev/null && echo true || echo false)
+
 create_command() {
     name=$1
     string=$2
 
-    if [ -z "$name" ] ; then
-        echo "Error: command name must be provided"
+
+    if $is_termux; then
+        usr_dir="$PREFIX/bin"  # Set the Termux-specific directory
+        sudo=""                 # No sudo required in Termux
+    else
+        usr_dir="/usr/local/bin"  # Set the default directory for Linux systems
+        sudo="sudo"               # sudo required on Linux systems
+    fi
+
+    # Ensure the command name and string are provided
+    if [ -z "$name" ]; then
+        print_red "Error: command name must be provided"
         return
     fi
-    if [ -z "$string" ] ; then
-        echo "Error: command string must be provided"
+    if [ -z "$string" ]; then
+        print_red "Error: command string must be provided"
         return
     fi
 
-    if ! command -v $name &> /dev/null
-    then
-        echo "$name command not found, creating it..."
+    # Check if the command already exists
+    if ! command -v $name &> /dev/null; then
+        print_yellow "$name command not found, creating it..."
 
-        cat << EOF | sudo tee /usr/local/bin/$name > /dev/null
-$string
-EOF
+        echo "$string" | $sudo tee $usr_dir/$name > /dev/null
+
         if [ $? -ne 0 ]; then
-            echo "Error: Failed to create the command script."
+            print_red "Error: Failed to create the command script."
             return
         fi
-        sudo chmod +x /usr/local/bin/$name
 
-        echo "$name command created successfully."
+        # Make the command executable using sudo if necessary
+        $sudo chmod +x $usr_dir/$name
+
+        print_green "$name command created successfully."
     fi
 }
 
@@ -103,9 +155,18 @@ create_command "loop" $loop_command_string
 trash_command_string='
 #!/usr/bin/env bash
 
+trash_dir="${HOME}/.local/share/Trash/files"
+
+if [ ! -d $trash_dir ]; then
+  mkdir -p $trash_dir
+  echo "Created trash directory at: $trash_dir"
+fi
+
 for file in "$@"; do 
+
     base=$(basename "$file")
-    dest="'${HOME}'/.local/share/Trash/files/$base"
+    dest="$trash_dir/$base"
+
     if [ -e "$dest" ]; then 
         i=1
         while [ -e "'${HOME}'/.local/share/Trash/files/${base} ($i)" ]; do 
@@ -285,14 +346,62 @@ COMPLETION_WAITING_DOTS="true"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(
-  git 
-  zsh-autosuggestions 
-  fast-syntax-highlighting 
-  zsh-autocomplete 
-  # zsh-syntax-highlighting 
-  # zsh-vi-mode
-)
+
+install_plugin() {
+    github_repo=$1
+    plugin_name=$2
+
+    if [ -z "$github_repo" ]; then
+        print_red "Error: github repo must be provided"
+        return
+    fi
+    if [ -z "$plugin_name" ]; then
+        print_red "Error: plugin name must be provided"
+        return
+    fi
+
+    plugin_dir="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/$plugin_name"
+
+    if [ ! -d "$plugin_dir" ]; then
+        print_yellow "Installing $plugin_name.. ."
+        git clone "$github_repo" "$plugin_dir"
+        
+        if [ $? -eq 0 ]; then
+                print_green "$plugin_name installed successfully."
+            else
+                print_red "Error: Failed to install $plugin_name."
+            fi
+
+    fi
+
+}
+
+# Function to install multiple plugins and store the plugin names in an array
+install_plugins() {
+    repos=("$@")           # Get all the repositories passed as arguments
+    installed_plugins=()   # Initialize an empty array to store installed plugin names
+
+    for repo in "${repos[@]}"; do
+        plugin_name=$(basename "$repo" .git)  # Extract the plugin name from repo URL
+
+        # Skip installation for the "git" plugin
+        if [ "$plugin_name" = "git" ]; then
+            installed_plugins+=("$plugin_name")
+        else
+            install_plugin $repo $plugin_name
+            installed_plugins+=("$plugin_name")   # Add the plugin name to the array
+        fi
+    done
+
+    plugins=("${installed_plugins[@]}")
+}
+
+install_plugins "https://github.com/git/git.git" \
+                "https://github.com/zsh-users/zsh-autosuggestions.git" \
+                "https://github.com/zdharma-continuum/fast-syntax-highlighting.git" \
+                "https://github.com/marlonrichert/zsh-autocomplete.git"
+
+
 source $ZSH/oh-my-zsh.sh
 # Vim
 ZVM_VI_INSERT_ESCAPE_BINDKEY=jk
@@ -346,4 +455,7 @@ export SUDO_EDITOR
 
 export PATH="$PATH:/${HOME}/.local/bin"
 export MUTTER_DEBUG=all
-if [ "$TMUX" = "" ]; then tmux; fi
+
+
+# fastfetch --logo /home/sen/Pictures/icon.png --logo-width 40 --logo-height 30 --pipe false;
+fastfetch
